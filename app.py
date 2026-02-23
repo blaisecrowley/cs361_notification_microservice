@@ -111,6 +111,24 @@ def list_users():
         "users": [r["user_id"] for r in rows]
     }), 200
 
+@app.route("/notifications/<int:notification_id>", methods=["PATCH"])
+def mark_read(notification_id):
+    data = request.get_json()
+
+    if "unread" not in data:
+        return jsonify({"error": "Must include 'unread' true or false"}), 400
+
+    unread_value = 1 if data["unread"] else 0
+
+    with get_db() as conn:
+        conn.execute(
+            "UPDATE notifications SET unread = ? WHERE notification_id = ?",
+            (unread_value, notification_id),
+        )
+        conn.commit()
+
+    return jsonify({"message": "Notification updated"}), 200
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=8001, debug=True)
