@@ -85,6 +85,21 @@ def list_user_notifications(user_id):
     }), 200
 
 
+@app.route("/users/<user_id>/unread-count", methods=["GET"])
+def get_unread_count(user_id):
+    """Get unread notification count for a given user."""
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS unread_count FROM notifications WHERE user_id = ? AND unread = 1",
+            (user_id,),
+        ).fetchone()
+
+    return jsonify({
+        "user_id": user_id,
+        "unread_count": row["unread_count"],
+    }), 200
+
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=8001, debug=True)
