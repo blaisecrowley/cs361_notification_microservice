@@ -26,41 +26,52 @@ python app.py
 | PATCH | `/notifications/<notification_id>` | Mark as read/unread. Body: `{"unread": true}` or `{"unread": false}` |
 | GET | `/users/<user_id>/unread-count` | Get unread notification count for a user |
 
-## How to programmatically REQUEST data from this microservice
+## How to programmatically REQUEST data (REST API)
 
-Data is requested from this microservice by sending HTTP GET requests to the appropriate endpoints. Example in Python:
+Example: get all notifications for a user.
+
+| Method | URL |
+|--------|-----|
+| GET | `http://127.0.0.1:8001/users/<user_id>/notifications` |
+
+Requesting that data in Python:
 
 ```python
 import requests
 
-BASE_URL = "http://127.0.0.1:8001"
 user_id = "alice"
-
-response = requests.get(f"{BASE_URL}/users/{user_id}/notifications")
-notifications = response.json()
+response = requests.get(f"http://127.0.0.1:8001/users/{user_id}/notifications")
 ```
 
-Use the returned JSON as needed.
+## How to programmatically RECEIVE data (JSON)
 
-## How to programmatically RECEIVE data from this microservice
+Example response from **GET /users/<user_id>/notifications** (200 OK):
 
-Data is received from this microservice when other services POST new notifications to it. Example in Python:
+```json
+{
+  "user_id": "alice",
+  "notifications": [
+    {
+      "notification_id": 1,
+      "user_id": "alice",
+      "notification_description": "Someone liked your activity",
+      "created_at": "2025-02-23 12:00:00",
+      "unread": true
+    }
+  ]
+}
+```
+
+Receiving that JSON in Python:
 
 ```python
-import requests
+data = response.json()
 
-BASE_URL = "http://127.0.0.1:8001"
-
-response = requests.post(
-    f"{BASE_URL}/notifications",
-    json={
-        "user_id": "alice",
-        "notification_description": "Someone liked your activity",
-    },
-    headers={"Content-Type": "application/json"},
-)
-
-result = response.json()
+if response.ok:
+    user_id = data["user_id"]
+    notifications = data["notifications"]
+else:
+    error_message = data.get("error", "Unknown error")
 ```
 
 ## UML sequence diagram
