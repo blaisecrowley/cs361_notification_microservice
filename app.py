@@ -99,18 +99,6 @@ def get_unread_count(user_id):
         "unread_count": row["unread_count"],
     }), 200
 
-@app.route("/users", methods=["GET"])
-def list_users():
-    """Get all distinct users that have at least one notification."""
-    with get_db() as conn:
-        rows = conn.execute(
-            "SELECT DISTINCT user_id FROM notifications ORDER BY user_id ASC"
-        ).fetchall()
-
-    return jsonify({
-        "users": [r["user_id"] for r in rows]
-    }), 200
-
 @app.route("/notifications/<int:notification_id>", methods=["PATCH"])
 def mark_read(notification_id):
     data = request.get_json()
